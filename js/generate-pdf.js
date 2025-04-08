@@ -130,30 +130,46 @@ function addPdfHeaderWithImage(doc, metadata = {}, base64Image) {
   return currentY;
 }
 
-function addPdfFooter(doc, currentY) {
+function addPdfFooter(doc, currentY, index) {
   const pageWidth = doc.internal.pageSize.getWidth();
   const leftX = 15;
   const spacing = 5;
+  const sectionWidth = (pageWidth - 2 * 15) / 3; // 3 columns between 15mm margins
+  const centerX = leftX + sectionWidth;
+  const rightX = centerX + sectionWidth + 10;
+
+  currentY += spacing + 5;
 
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
+  doc.text(
+    index +
+      ". DOCUMENTE EMISE CU PRIVIRE LA TERENUL SPATIU VERDE SI CONSTRUCTIILE EXISTENTE:",
+    leftX,
+    currentY
+  );
 
-  // Draw text content
-  doc.text("Întocmit:", leftX, currentY);
-  currentY += spacing;
-  doc.text("Nume și Prenume: Popa Radu", leftX, currentY);
-  currentY += spacing;
-  doc.text("Funcție: Inspector", leftX, currentY);
-  currentY += spacing;
-  doc.text("Semnătura:", leftX, currentY);
+  currentY += spacing + 5;
+  const imgHeight = 40;
+
+  doc.setFontSize(8);
+  doc.text(
+      `Data realizarii: ${new Date().toLocaleDateString("ro-RO")}`,
+    leftX,
+    currentY + imgHeight / 3
+  );
+
+  doc.text(
+      `Data actualizarii: ${new Date().toLocaleDateString("ro-RO")}`,
+    centerX,
+    currentY + imgHeight / 3
+  );
 
   // Add stamp image on the right side
-  const imgWidth = 40;
-  const imgHeight = 40;
-  const imgX = pageWidth - leftX - imgWidth;
+  const imgWidth = 50;
   const imgY = currentY - spacing; // align with signature line
 
-  doc.addImage("images/stampila.png", "PNG", imgX, imgY, imgWidth, imgHeight);
+  doc.addImage("images/stampila.png", "PNG", rightX, imgY, imgWidth, imgHeight);
 
   // Return the updated Y position
   currentY += imgHeight + spacing;
@@ -236,7 +252,7 @@ function addImobile(doc, features, currentY, index) {
   currentY += spacing;
 
   const imobile = features.filter(
-    (feature) => feature.properties["Id_ imobil"] // note the space in key name
+    (feature) => feature.properties["Id_ imobil"] && feature.properties.Judetul// note the space in key name
   );
 
   const imobileTableData = imobile.map((feature) => {
@@ -544,7 +560,7 @@ function generateArboriPDF(base64Image, selectedFeatures) {
 
       currentY = addIntravilan(doc, selectedFeatures, currentY, 8);
 
-      currentY = addPdfFooter(doc, currentY);
+      currentY = addPdfFooter(doc, currentY, 9);
 
       doc.save("fisa_spatiu_verde_arbori.pdf");
     });
