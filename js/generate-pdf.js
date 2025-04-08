@@ -105,13 +105,13 @@ function addPdfHeaderWithImage(doc, metadata = {}, base64Image) {
 
   // Map image
   if (base64Image) {
-    const imgX = leftX;
+    const imgWidth = pageWidth / 1.5;
+    const imgHeight = pageWidth / 3;
+    const imgX = (pageWidth - imgWidth) / 2;
     const imgY = currentY + 5;
-    const imgWidth = pageWidth - 2 * leftX;
-    const imgHeight = 100;
 
     doc.rect(imgX, imgY, imgWidth, imgHeight); // 👈 black border
-    doc.addImage(base64Image, "PNG", imgX, imgY + 1, imgWidth, imgHeight - 2);
+    doc.addImage(base64Image, "PNG", imgX, imgY, imgWidth, imgHeight);
 
     currentY += imgHeight;
   }
@@ -130,12 +130,41 @@ function addPdfHeaderWithImage(doc, metadata = {}, base64Image) {
   return currentY;
 }
 
-function addArbori(doc, features, currentY) {
-  console.log(currentY);
+function addPdfFooter(doc, currentY) {
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const leftX = 15;
+  const spacing = 5;
+
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+
+  // Draw text content
+  doc.text("Întocmit:", leftX, currentY);
+  currentY += spacing;
+  doc.text("Nume și Prenume: Popa Radu", leftX, currentY);
+  currentY += spacing;
+  doc.text("Funcție: Inspector", leftX, currentY);
+  currentY += spacing;
+  doc.text("Semnătura:", leftX, currentY);
+
+  // Add stamp image on the right side
+  const imgWidth = 40;
+  const imgHeight = 40;
+  const imgX = pageWidth - leftX - imgWidth;
+  const imgY = currentY - spacing; // align with signature line
+
+  doc.addImage("images/stampila.png", "PNG", imgX, imgY, imgWidth, imgHeight);
+
+  // Return the updated Y position
+  currentY += imgHeight + spacing;
+  return currentY;
+}
+
+function addArbori(doc, features, currentY, index) {
   currentY += spacing;
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
-  doc.text("3. DATE DESPRE ARBORI", leftX, currentY);
+  doc.text(index + ". DATE DESPRE ARBORI", leftX, currentY);
 
   currentY += spacing;
   // 1. Arbori table
@@ -197,13 +226,115 @@ function addArbori(doc, features, currentY) {
   return doc.lastAutoTable.finalY + spacing;
 }
 
-function addParcele(doc, features, currentY) {
-  console.log(currentY);
+function addImobile(doc, features, currentY, index) {
   currentY += spacing;
 
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
-  doc.text("4. DATE DESPRE PARCELE", leftX, currentY);
+  doc.text(index + ". DATE DESPRE IMOBILE", leftX, currentY);
+
+  currentY += spacing;
+
+  const imobile = features.filter(
+    (feature) => feature.properties["Id_ imobil"] // note the space in key name
+  );
+
+  const imobileTableData = imobile.map((feature) => {
+    const p = feature.properties;
+    return [
+      p["Id_ imobil"] || "",
+      p.Judetul || "",
+      p.Localitate || "",
+      p.Adresa || "",
+      p.Suprafata?.toFixed(2) || "",
+    ];
+  });
+
+  doc.autoTable({
+    startY: currentY,
+    head: [["Id. imobil", "Judetul", "Localitate", "Adresa", "Suprafata [mp]"]],
+    body: imobileTableData,
+    styles: {
+      fontSize: 8,
+      cellPadding: 0.5,
+      halign: "left",
+      valign: "middle",
+      lineWidth: 0.1,
+      lineColor: [0, 0, 0],
+      fillColor: false,
+      textColor: [0, 0, 0],
+    },
+    headStyles: {
+      fillColor: false,
+      textColor: [0, 0, 0],
+      halign: "left",
+      fontStyle: "normal",
+      lineWidth: 0.1,
+      lineColor: [0, 0, 0],
+    },
+    tableLineColor: [0, 0, 0],
+    tableLineWidth: 0.1,
+    tableWidth: "auto",
+    theme: "grid",
+  });
+
+  return doc.lastAutoTable.finalY + spacing;
+}
+
+function addIntravilan(doc, features, currentY, index) {
+  const spacing = 5;
+  const leftX = 15;
+
+  currentY += spacing;
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.text(index + ". DATE DESPRE INTRAVILAN", leftX, currentY);
+
+  currentY += spacing;
+
+  const intravilan = features.filter((feature) => feature.properties.LABEL);
+
+  const intravilanTableData = intravilan.map((feature) => {
+    return [feature.properties.LABEL || ""];
+  });
+
+  doc.autoTable({
+    startY: currentY,
+    head: [["Nume Strada"]],
+    body: intravilanTableData,
+    styles: {
+      fontSize: 8,
+      cellPadding: 0.5,
+      halign: "left",
+      valign: "middle",
+      lineWidth: 0.1,
+      lineColor: [0, 0, 0],
+      fillColor: false,
+      textColor: [0, 0, 0],
+    },
+    headStyles: {
+      fillColor: false,
+      textColor: [0, 0, 0],
+      halign: "left",
+      fontStyle: "normal",
+      lineWidth: 0.1,
+      lineColor: [0, 0, 0],
+    },
+    tableLineColor: [0, 0, 0],
+    tableLineWidth: 0.1,
+    tableWidth: "auto",
+    theme: "grid",
+  });
+
+  return doc.lastAutoTable.finalY + spacing;
+}
+
+function addParcele(doc, features, currentY, index) {
+  currentY += spacing;
+
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.text(index + ". DATE DESPRE PARCELE", leftX, currentY);
 
   currentY += spacing;
 
@@ -261,6 +392,128 @@ function addParcele(doc, features, currentY) {
   return doc.lastAutoTable.finalY + spacing;
 }
 
+function addGardViu(doc, features, currentY, index) {
+  const spacing = 5;
+  const leftX = 15;
+
+  currentY += spacing;
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.text(index + ". DATE DESPRE GARD VIU", leftX, currentY);
+
+  currentY += spacing;
+
+  const gardViu = features.filter(
+    (feature) => feature.properties.Id_gard && feature.properties.Lungime
+  );
+
+  const gardViuTableData = gardViu.map((feature) => {
+    const p = feature.properties;
+    return [p.Id_gard || "", `${p.Lungime?.toFixed(2) || ""} m`];
+  });
+
+  doc.autoTable({
+    startY: currentY,
+    head: [["Nr. gard viu", "Lungime [m]"]],
+    body: gardViuTableData,
+    styles: {
+      fontSize: 8,
+      cellPadding: 0.5,
+      halign: "left",
+      valign: "middle",
+      lineWidth: 0.1,
+      lineColor: [0, 0, 0],
+      fillColor: false,
+      textColor: [0, 0, 0],
+    },
+    headStyles: {
+      fillColor: false,
+      textColor: [0, 0, 0],
+      halign: "left",
+      fontStyle: "normal",
+      lineWidth: 0.1,
+      lineColor: [0, 0, 0],
+    },
+    tableLineColor: [0, 0, 0],
+    tableLineWidth: 0.1,
+    tableWidth: "auto",
+    theme: "grid",
+  });
+
+  return doc.lastAutoTable.finalY + spacing;
+}
+
+function addConstructii(doc, features, currentY, index) {
+  const spacing = 5;
+  const leftX = 15;
+
+  currentY += spacing;
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.text(index + ". DATE DESPRE CONSTRUCTII", leftX, currentY);
+
+  currentY += spacing;
+
+  const constructii = features.filter(
+    (feature) => feature.properties.Id_constr
+  );
+
+  const constructiiTableData = constructii.map((feature) => {
+    const p = feature.properties;
+    return [
+      p.Id_constr || "",
+      p["Id_ imobil"] || "",
+      p.Prop_detin || "",
+      p.Tip_prop || "",
+      p.Mod_adm || "",
+      p.Nr_corp || "",
+      p.Cod_dest || "",
+      p.Supr_const?.toFixed(2) || "",
+    ];
+  });
+
+  doc.autoTable({
+    startY: currentY,
+    head: [
+      [
+        "Nr. constructie",
+        "ID Imobil",
+        "Proprietar/Detinator",
+        "Tip proprietate",
+        "Mod administrare",
+        "Corp",
+        "Destinatie",
+        "Suprafata [mp]",
+      ],
+    ],
+    body: constructiiTableData,
+    styles: {
+      fontSize: 8,
+      cellPadding: 0.5,
+      halign: "left",
+      valign: "middle",
+      lineWidth: 0.1,
+      lineColor: [0, 0, 0],
+      fillColor: false,
+      textColor: [0, 0, 0],
+    },
+    headStyles: {
+      fillColor: false,
+      textColor: [0, 0, 0],
+      halign: "left",
+      fontStyle: "normal",
+      lineWidth: 0.1,
+      lineColor: [0, 0, 0],
+    },
+    tableLineColor: [0, 0, 0],
+    tableLineWidth: 0.1,
+    tableWidth: "auto",
+    theme: "grid",
+  });
+
+  return doc.lastAutoTable.finalY + spacing;
+}
+
 // generate-pdf.js
 function generateArboriPDF(base64Image, selectedFeatures) {
   loadJsPDF(() => {
@@ -279,9 +532,19 @@ function generateArboriPDF(base64Image, selectedFeatures) {
         base64Image
       );
 
-      currentY = addArbori(doc, selectedFeatures, currentY);
+      currentY = addArbori(doc, selectedFeatures, currentY, 3);
 
-      currentY = addParcele(doc, selectedFeatures, currentY);
+      currentY = addParcele(doc, selectedFeatures, currentY, 4);
+
+      currentY = addImobile(doc, selectedFeatures, currentY, 5);
+
+      currentY = addConstructii(doc, selectedFeatures, currentY, 6);
+
+      currentY = addGardViu(doc, selectedFeatures, currentY, 7);
+
+      currentY = addIntravilan(doc, selectedFeatures, currentY, 8);
+
+      currentY = addPdfFooter(doc, currentY);
 
       doc.save("fisa_spatiu_verde_arbori.pdf");
     });
