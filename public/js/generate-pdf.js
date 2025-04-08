@@ -562,7 +562,7 @@ function generateArboriPDF(base64Image, selectedFeatures) {
 
       currentY = addPdfFooter(doc, currentY, 9);
 
-      doc.save("fisa_spatiu_verde_arbori.pdf");
+      doc.save("export_topo_pdf.pdf");
     });
   });
 }
