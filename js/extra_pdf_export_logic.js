@@ -1,11 +1,65 @@
-// Use the correct tileLayer in easyPrint config
-const printPlugin = L.easyPrint({
-  tileLayer: osmTileLayer, // ✅ use the OSM layer instead
-  sizeModes: ["CurrentSize"],
-  filename: "map-screenshot",
-  exportOnly: true,
-  hideControlContainer: true
-}).addTo(map);
+// Import scripts
+function loadGeneratePDFScript(callback) {
+  const script = document.createElement("script");
+  script.src = "js/generate-pdf.js";
+  script.onload = () => {
+    console.log("generate-pdf.js loaded ✅");
+    if (typeof callback === "function") {
+      callback();
+    }
+  };
+  script.onerror = () => {
+    console.error("Failed to load generate-pdf.js ❌");
+  };
+  document.head.appendChild(script);
+}
+
+// Create and append the button to the map container
+const pdfButton = document.createElement("button");
+pdfButton.id = "generate-pdf-button";
+pdfButton.textContent = "Exporta PDF";
+
+// Style the button
+pdfButton.style.position = "absolute";
+pdfButton.style.bottom = "10px";
+pdfButton.style.left = "10px";
+pdfButton.style.zIndex = "1000";
+pdfButton.style.padding = "10px 20px";
+pdfButton.style.backgroundColor = "#007bff";
+pdfButton.style.color = "white";
+pdfButton.style.border = "none";
+pdfButton.style.borderRadius = "5px";
+pdfButton.style.cursor = "pointer";
+pdfButton.style.fontSize = "14px";
+
+// Disable the button initially
+pdfButton.disabled = true;
+pdfButton.style.opacity = "0.5"; // Make it visually appear disabled
+
+// Add hover effect (only if enabled)
+pdfButton.addEventListener("mouseover", () => {
+  if (!pdfButton.disabled) {
+    pdfButton.style.backgroundColor = "#0056b3";
+  }
+});
+pdfButton.addEventListener("mouseout", () => {
+  if (!pdfButton.disabled) {
+    pdfButton.style.backgroundColor = "#007bff";
+  }
+});
+
+document.body.appendChild(pdfButton);
+
+map.on("draw:created", function (e) {
+  pdfButton.disabled = false;
+  pdfButton.style.opacity = "1";
+});
+
+map.on("draw:deleted", function (e) {
+  pdfButton.disabled = true;
+  pdfButton.style.opacity = "0.5";
+});
+// End of button export related logic
 
 var isDrawingEnabled = false;
 var drawControl = null;
@@ -14,12 +68,12 @@ var drawControl = null;
 var drawnItems = new L.FeatureGroup();
 map.addLayer(drawnItems);
 
+var selectedFeatures = [];
 // Handle the creation of a new shape
 map.on(L.Draw.Event.CREATED, function (event) {
   var layer = event.layer;
   drawnItems.addLayer(layer);
 
-  var selectedFeatures = [];
   var polygon = L.geoJSON(layer.toGeoJSON());
 
   // Iterate through layers and check if they intersect with the drawn polygon
@@ -35,7 +89,6 @@ map.on(L.Draw.Event.CREATED, function (event) {
   });
 
   console.log("Selected Features:", selectedFeatures);
-  alert(selectedFeatures.length + " features selected!");
 });
 
 // Function to check if a feature is inside the drawn polygon
@@ -74,11 +127,43 @@ var drawControl = new L.Control.Draw({
 });
 map.addControl(drawControl);
 
-// Logic for creating the pdf
+function captureMapScreenshot() {
+  const mapContainer = document.getElementById("map");
 
-// Export to PDF functionality
+  document.querySelectorAll(".leaflet-tooltip").forEach((el) => {
+    el.style.display = "none";
+  });
+  console.log(selectedFeatures, " aicii");
+  if (selectedFeatures.length === 0) {
+    alert("Nu ati selectat niciun element de pe harta.");
+  }
+
+  loadGeneratePDFScript(() => {
+    html2canvas(mapContainer, {
+      useCORS: true,
+      backgroundColor: null,
+      logging: true,
+      scale: 2, // Higher resolution
+      windowWidth: window.innerWidth,
+      windowHeight: window.innerHeight,
+    })
+      .then((canvas) => {
+        const base64Image = canvas.toDataURL("image/png");
+
+        generateArboriPDF(base64Image, selectedFeatures);
+      })
+      .catch((err) => {
+        console.error("Screenshot error:", err);
+      })
+      .finally(() => {
+        document.querySelectorAll(".leaflet-tooltip").forEach((el) => {
+          el.style.display = "";
+        });
+      });
+  });
+}
 document
   .getElementById("generate-pdf-button")
   .addEventListener("click", function () {
-    printPlugin.printMap("CurrentSize", "map-screenshot");
+    captureMapScreenshot();
   });

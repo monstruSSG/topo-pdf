@@ -78,7 +78,6 @@
   </head>
   <body>
     <div id="map"></div>
-    <button id="generate-pdf-button">Generate PDF</button>
 
     <script src="js/qgis2web_expressions.js"></script>
     <script src="js/leaflet.js"></script>
@@ -106,12 +105,12 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
     <script src="https://unpkg.com/leaflet-pip@1.1.0/leaflet-pip.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/leaflet-easyprint@2.1.9/dist/bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
     <script>
       var map = L.map("map", {
         zoomControl: false,
-        maxZoom: 28,
+        maxZoom: 18,
         minZoom: 1,
       }).fitBounds([
         [46.538830465625765, 23.74409226608196],
@@ -192,28 +191,25 @@
       map.createPane("pane_GoogleMaps_0");
       map.getPane("pane_GoogleMaps_0").style.zIndex = 400;
       var layer_GoogleMaps_0 = L.tileLayer(
-        "https://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}",
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
         {
-          pane: "pane_GoogleMaps_0",
-          opacity: 1.0,
-          attribution: "",
-          minZoom: 1,
-          maxZoom: 28,
-          minNativeZoom: 0,
-          maxNativeZoom: 18,
+          attribution: "&copy; OpenStreetMap contributors",
+          crossOrigin: true,
         }
       );
       layer_GoogleMaps_0;
       map.addLayer(layer_GoogleMaps_0);
       map.createPane("pane_GoogleSatellite_1");
       map.getPane("pane_GoogleSatellite_1").style.zIndex = 401;
-      const osmTileLayer = L.tileLayer(
+      var layer_GoogleSatellite_1 = L.tileLayer(
         "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
         {
           attribution: "&copy; OpenStreetMap contributors",
+          crossOrigin: true,
         }
       );
-      osmTileLayer.addTo(map);
+      layer_GoogleSatellite_1;
+      map.addLayer(layer_GoogleSatellite_1);
 
       function pop_LimitaUAT_2(feature, layer) {}
 
