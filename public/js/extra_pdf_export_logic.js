@@ -32,6 +32,8 @@ pdfButton.style.borderRadius = "5px";
 pdfButton.style.cursor = "pointer";
 pdfButton.style.fontSize = "14px";
 
+var selectedImobilPDF = null;
+
 // Disable the button initially
 pdfButton.disabled = true;
 pdfButton.style.opacity = "0.5"; // Make it visually appear disabled
@@ -61,37 +63,71 @@ map.on("draw:deleted", function (e) {
 });
 // End of button export related logic
 
-var isDrawingEnabled = false;
-var drawControl = null;
-
-// Initialize the drawn items layer
+// Start of imobile select logic
+// Load the imobile_4.js GeoJSON layer
 var drawnItems = new L.FeatureGroup();
+
 map.addLayer(drawnItems);
+var imobileLayer = L.geoJSON(json_Imobile_4, {
+  style: {
+    color: "#3388ff",
+    weight: 2,
+    fillOpacity: 0.2,
+  },
+  onEachFeature: function (feature, layer) {
+    // Add a popup with metadata about the "imobil"
+    if (feature.properties) {
+      var popupContent = "<b>Imobil Metadata:</b><br>";
+      for (var key in feature.properties) {
+        popupContent += `${key}: ${feature.properties[key]}<br>`;
+      }
+      layer.bindPopup(popupContent);
+    }
 
-var selectedFeatures = [];
-// Handle the creation of a new shape
-map.on(L.Draw.Event.CREATED, function (event) {
-  var layer = event.layer;
-  drawnItems.addLayer(layer);
+    // Add a click event to each "imobil"
+    layer.on("click", function () {
+      // Clear previous selection
+      drawnItems.clearLayers();
 
-  var polygon = L.geoJSON(layer.toGeoJSON());
+      // Highlight the selected "imobil"
+      var selectedImobil = L.geoJSON(feature, {
+        style: {
+          color: "red",
+          weight: 3,
+          fillOpacity: 0.4,
+        },
+      }).addTo(drawnItems);
 
-  // Iterate through layers and check if they intersect with the drawn polygon
-  map.eachLayer(function (lyr) {
-    if (lyr instanceof L.GeoJSON && lyr.options.dataVar) {
-      var features = window[lyr.options.dataVar].features;
-      features.forEach(function (feature) {
-        if (isFeatureInsidePolygon(feature, polygon)) {
-          selectedFeatures.push(feature);
+      // Open the popup for the selected "imobil"
+      layer.openPopup();
+
+      // Retrieve elements inside the selected "imobil"
+      selectedFeatures = [];
+      map.eachLayer(function (lyr) {
+        if (lyr instanceof L.GeoJSON && lyr.options.dataVar) {
+          var features = window[lyr.options.dataVar].features;
+          features.forEach(function (feature) {
+            if (isFeatureInsidePolygon(feature, selectedImobil)) {
+              selectedFeatures.push(feature);
+            }
+          });
         }
       });
-    }
-  });
 
-  console.log("Selected Features:", selectedFeatures);
-});
+      selectedImobilPDF = feature;
 
-// Function to check if a feature is inside the drawn polygon
+      // Enable the "Exporta PDF" button
+      pdfButton.disabled = false;
+      pdfButton.style.opacity = "1";
+      if (feature && feature.properties && feature.properties["Id_ imobil"]) {
+        // Add the selected "imobil" to the selectedFeatures array
+        pdfButton.textContent = `Exporta PDF (Id imobil: ${feature.properties["Id_ imobil"]})`;
+      }
+    });
+  },
+}).addTo(map);
+
+// Function to check if a feature is inside the selected "imobil"
 function isFeatureInsidePolygon(feature, polygon) {
   var featureLayer = L.geoJSON(feature);
   var featureBounds = featureLayer.getBounds();
@@ -104,6 +140,15 @@ function isFeatureInsidePolygon(feature, polygon) {
   );
 }
 
+// Disable the "Exporta PDF" button if no "imobil" is selected
+map.on("click", function (e) {
+  if (selectedFeatures.length === 0) {
+    pdfButton.disabled = true;
+    pdfButton.style.opacity = "0.5";
+  }
+});
+// End of imobile select logic
+
 // Remove the "My Location" control
 map.eachLayer(function (layer) {
   if (layer instanceof L.Control.Locate) {
@@ -111,30 +156,14 @@ map.eachLayer(function (layer) {
   }
 });
 
-// Add the polygon drawing control to the top-left corner
-var drawControl = new L.Control.Draw({
-  position: "topleft",
-  edit: {
-    featureGroup: drawnItems,
-  },
-  draw: {
-    polygon: true,
-    rectangle: true,
-    circle: false,
-    marker: false,
-    polyline: false,
-  },
-});
-map.addControl(drawControl);
-
 function captureMapScreenshot() {
   const mapContainer = document.getElementById("map");
 
   document.querySelectorAll(".leaflet-tooltip").forEach((el) => {
     el.style.display = "none";
   });
-  console.log(selectedFeatures, " aicii");
-  if (selectedFeatures.length === 0) {
+
+  if (selectedFeatures.length === 0 || selectedImobilPDF === null) {
     alert("Nu ati selectat niciun element de pe harta.");
   }
 
@@ -150,7 +179,7 @@ function captureMapScreenshot() {
       .then((canvas) => {
         const base64Image = canvas.toDataURL("image/png");
 
-        generateArboriPDF(base64Image, selectedFeatures);
+        generateArboriPDF(base64Image, selectedFeatures, selectedImobilPDF);
       })
       .catch((err) => {
         console.error("Screenshot error:", err);

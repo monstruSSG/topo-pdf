@@ -531,7 +531,8 @@ function addConstructii(doc, features, currentY, index) {
 }
 
 // generate-pdf.js
-function generateArboriPDF(base64Image, selectedFeatures) {
+function generateArboriPDF(base64Image, selectedFeatures, imobil) {
+  console.log('Imobil', imobil)
   loadJsPDF(() => {
     loadAutoTableScript(() => {
       const doc = new jspdf.jsPDF("p", "mm", "a4");
