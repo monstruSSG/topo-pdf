@@ -22,7 +22,7 @@ const leftX = 15;
 const startY = 15;
 
 // Auxilliary functions
-function addPdfHeaderWithImage(doc, metadata = {}, base64Image) {
+function addPdfHeaderWithImage(doc, metadata = {}, base64Image, imobil) {
   const {
     judet = "Bihor",
     localitate = "Oradea",
@@ -120,7 +120,7 @@ function addPdfHeaderWithImage(doc, metadata = {}, base64Image) {
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
   doc.text(
-    "2. DENUMIRE OBIECTIV: Spatiu bl. T14, F11-F12,S1-S13,X1X5, ZP1- ZP11, Cartier ROGERIUS",
+    `2. DENUMIRE OBIECTIV: ${imobil.Adresa}, ${imobil.TipSV}`,
     leftX,
     currentY
   );
@@ -130,7 +130,7 @@ function addPdfHeaderWithImage(doc, metadata = {}, base64Image) {
   return currentY;
 }
 
-function addPdfFooter(doc, currentY, index) {
+function addPdfFooter(doc, currentY, index, imobil) {
   const pageWidth = doc.internal.pageSize.getWidth();
   const leftX = 15;
   const spacing = 5;
@@ -144,7 +144,8 @@ function addPdfFooter(doc, currentY, index) {
   doc.setFont("helvetica", "normal");
   doc.text(
     index +
-      ". DOCUMENTE EMISE CU PRIVIRE LA TERENUL SPATIU VERDE SI CONSTRUCTIILE EXISTENTE:",
+      ". DOCUMENTE EMISE CU PRIVIRE LA TERENUL SPATIU VERDE SI CONSTRUCTIILE EXISTENTE: " +
+      (imobil.Document || ""),
     leftX,
     currentY
   );
@@ -154,13 +155,13 @@ function addPdfFooter(doc, currentY, index) {
 
   doc.setFontSize(8);
   doc.text(
-      `Data realizarii: ${new Date().toLocaleDateString("ro-RO")}`,
+    `Data realizarii: ${new Date().toLocaleDateString("ro-RO")}`,
     leftX,
     currentY + imgHeight / 3
   );
 
   doc.text(
-      `Data actualizarii: ${new Date().toLocaleDateString("ro-RO")}`,
+    `Data actualizarii: ${new Date().toLocaleDateString("ro-RO")}`,
     centerX,
     currentY + imgHeight / 3
   );
@@ -252,7 +253,7 @@ function addImobile(doc, features, currentY, index) {
   currentY += spacing;
 
   const imobile = features.filter(
-    (feature) => feature.properties["Id_ imobil"] && feature.properties.Judetul// note the space in key name
+    (feature) => feature.properties["Id_ imobil"] && feature.properties.Judetul // note the space in key name
   );
 
   const imobileTableData = imobile.map((feature) => {
@@ -350,12 +351,16 @@ function addParcele(doc, features, currentY, index) {
 
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
-  doc.text(index + ". DATE DESPRE PARCELE", leftX, currentY);
+  doc.text(index + ". DATE DESPRE TERENUL SPATIU VERDE", leftX, currentY);
 
   currentY += spacing;
 
-  const parcele = features.filter((feature) => feature.properties.Id_parcela);
+  // Filter features with valid "Id_parcela" and "Suprafata"
+  const parcele = features.filter(
+    (feature) => feature.properties.Id_parcela && feature.properties.Suprafata
+  );
 
+  // Prepare table data
   const parceleTableData = parcele.map((feature) => {
     const p = feature.properties;
     return [
@@ -368,6 +373,23 @@ function addParcele(doc, features, currentY, index) {
     ];
   });
 
+  // Calculate the total "Suprafata"
+  const totalSuprafata = parcele.reduce(
+    (sum, feature) => sum + Number(feature.properties.Suprafata || 0),
+    0
+  );
+
+  // Add the "Total teren" row
+  parceleTableData.push([
+    {
+      content: "Total teren",
+      colSpan: 5, // Spans all columns except the last one
+      styles: { halign: "left", fontStyle: "bold" },
+    },
+    totalSuprafata.toFixed(2), // Total area
+  ]);
+
+  // Add the table to the PDF
   doc.autoTable({
     startY: currentY,
     head: [
@@ -466,14 +488,20 @@ function addConstructii(doc, features, currentY, index) {
   currentY += spacing;
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
-  doc.text(index + ". DATE DESPRE CONSTRUCTII", leftX, currentY);
+  doc.text(
+    index + ". DATE PRIVIND CONSTRUCTIILE EXISTENTE PE TERENUL SPATIU VERDE",
+    leftX,
+    currentY
+  );
 
   currentY += spacing;
 
+  // Filter features with valid "Id_constr" and "Suprafata construita la sol mp"
   const constructii = features.filter(
-    (feature) => feature.properties.Id_constr
+    (feature) => feature.properties.Id_constr && feature.properties.Supr_const
   );
 
+  // Prepare table data
   const constructiiTableData = constructii.map((feature) => {
     const p = feature.properties;
     return [
@@ -488,6 +516,23 @@ function addConstructii(doc, features, currentY, index) {
     ];
   });
 
+  // Calculate the total "Suprafata construita la sol mp"
+  const totalSuprafataConstruita = constructii.reduce(
+    (sum, feature) => sum + Number(feature.properties.Supr_const || 0),
+    0
+  );
+
+  // Add the "Total suprafata ocupata" row
+  constructiiTableData.push([
+    {
+      content: "Total suprafata ocupata din terenul spatiu verde",
+      colSpan: 7, // Spans all columns except the last one
+      styles: { halign: "left", fontStyle: "bold" },
+    },
+    totalSuprafataConstruita.toFixed(2), // Total area
+  ]);
+
+  // Add the table to the PDF
   doc.autoTable({
     startY: currentY,
     head: [
@@ -499,7 +544,7 @@ function addConstructii(doc, features, currentY, index) {
         "Mod administrare",
         "Corp",
         "Destinatie",
-        "Suprafata [mp]",
+        "Suprafata construita la sol [mp]",
       ],
     ],
     body: constructiiTableData,
@@ -530,9 +575,146 @@ function addConstructii(doc, features, currentY, index) {
   return doc.lastAutoTable.finalY + spacing;
 }
 
+function addEchipareaEditilatara(doc, currentY, index, imobil) {
+  const spacing = 5;
+  const leftX = 15;
+
+  currentY += spacing;
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.text(
+    index + `. DATE PRIVIND ECHIPAREA EDILITARA: ${imobil.Echip_edil}`,
+    leftX,
+    currentY
+  );
+
+  currentY += spacing;
+
+  return currentY;
+}
+
+function addCentralizatorSuprafete(
+  doc,
+  selectedFeatures,
+  currentY,
+  index,
+  imobil
+) {
+  const spacing = 5;
+  const leftX = 15;
+
+  currentY += spacing;
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.text(index + ". CENTRALIZATOR SUPRAFETE", leftX, currentY);
+
+  currentY += spacing;
+
+  // Filter features with a valid "Categ", "Suprafata", and "Tip_prop"
+  const parcele = selectedFeatures.filter(
+    (feature) =>
+      feature.properties.Categ &&
+      feature.properties.Suprafata &&
+      feature.properties.Tip_prop
+  );
+
+  // Group by "Categ" and calculate total area for each category
+  const groupedData = parcele.reduce((acc, feature) => {
+    const category = feature.properties.Categ;
+    const area = feature.properties.Suprafata || 0;
+    const description = feature.properties.Tip_prop;
+
+    if (!acc[category]) {
+      acc[category] = { totalArea: 0, description };
+    }
+    acc[category].totalArea += area;
+
+    return acc;
+  }, {});
+
+  // Calculate the total area of the imobil
+  const totalArea = imobil.Suprafata || 1; // Avoid division by zero
+
+  // Prepare data for the table
+  let tableData = Object.entries(groupedData)
+    .map(([category, data], idx) => {
+      const percentage = ((data.totalArea / totalArea) * 100).toFixed(2); // Calculate percentage
+      return [
+        idx + 1, // ID
+        category, // Categorie
+        data.description, // Descriere
+        data.totalArea.toFixed(2), // Suprafata
+        `${percentage}%`, // Procent din total
+      ];
+    })
+    .sort((a, b) => a[1].localeCompare(b[1])); // Sort alphabetically by category
+
+  // Calculate the sum of all SV, AF, ZC, and PD categories
+  const greenZoneCategories = ["SV", "AF", "ZC", "PD"];
+  const greenZoneArea = Object.entries(groupedData)
+    .filter(([category]) => greenZoneCategories.includes(category))
+    .reduce((sum, [, data]) => sum + data.totalArea, 0);
+
+  const greenZonePercentage = ((greenZoneArea / totalArea) * 100).toFixed(2);
+
+  // Add the "Total teren" row
+  tableData.push([
+    {
+      content: "Total teren",
+      colSpan: 3,
+      styles: { halign: "left", fontStyle: "bold" },
+    },
+    imobil.Suprafata.toFixed(2),
+    "100%",
+  ]);
+
+  // Add the "din care zona verde" row
+  tableData.push([
+    {
+      content: "din care zona verde (SV + AF + ZC + PD)",
+      colSpan: 3,
+      styles: { halign: "left", fontStyle: "italic" },
+    },
+    greenZoneArea.toFixed(2),
+    `${greenZonePercentage}%`,
+  ]);
+
+  // Add the table to the PDF
+  doc.autoTable({
+    startY: currentY,
+    head: [
+      ["ID", "Categorie", "Descriere", "Suprafata [mp]", "Procent din total"],
+    ],
+    body: tableData,
+    styles: {
+      fontSize: 8,
+      cellPadding: 0.5,
+      halign: "left",
+      valign: "middle",
+      lineWidth: 0.1,
+      lineColor: [0, 0, 0],
+      fillColor: false,
+      textColor: [0, 0, 0],
+    },
+    headStyles: {
+      fillColor: false,
+      textColor: [0, 0, 0],
+      halign: "left",
+      fontStyle: "normal",
+      lineWidth: 0.1,
+      lineColor: [0, 0, 0],
+    },
+    tableLineColor: [0, 0, 0],
+    tableLineWidth: 0.1,
+    tableWidth: "auto",
+    theme: "grid",
+  });
+
+  return doc.lastAutoTable.finalY + spacing;
+}
+
 // generate-pdf.js
 function generateArboriPDF(base64Image, selectedFeatures, imobil) {
-  console.log('Imobil', imobil)
   loadJsPDF(() => {
     loadAutoTableScript(() => {
       const doc = new jspdf.jsPDF("p", "mm", "a4");
@@ -540,28 +722,40 @@ function generateArboriPDF(base64Image, selectedFeatures, imobil) {
       let currentY = addPdfHeaderWithImage(
         doc,
         {
-          judet: "Bihor",
-          localitate: "Oreadea",
-          siruta: "12345",
-          identificatorImobil: "999",
-          suprafataImobil: "42083 mp",
+          judet: imobil.Judetul || "",
+          localitate: imobil.Localitate || "",
+          siruta: imobil.CodSiruta || "",
+          identificatorImobil: imobil["Id_ imobil"] || "",
+          suprafataImobil: imobil.Suprafata ? `${imobil.Suprafata} MP` : "",
+          nrCadastral: imobil.Nr_cad || "",
+          nrCarteFunciara: imobil.Nr_CF || "",
+          codZonaValorica: imobil.Codzonaval || "",
+          codZonaProtejata: imobil.Codzonapro || "",
+          codPostal: imobil.Codpostal || "",
         },
-        base64Image
+        base64Image,
+        imobil
       );
 
-      currentY = addArbori(doc, selectedFeatures, currentY, 3);
+      currentY = addParcele(doc, selectedFeatures, currentY, 3);
 
-      currentY = addParcele(doc, selectedFeatures, currentY, 4);
+      currentY = addCentralizatorSuprafete(
+        doc,
+        selectedFeatures,
+        currentY,
+        4,
+        imobil
+      );
 
-      currentY = addImobile(doc, selectedFeatures, currentY, 5);
+      currentY = addConstructii(doc, selectedFeatures, currentY, 5);
 
-      currentY = addConstructii(doc, selectedFeatures, currentY, 6);
+      currentY = addEchipareaEditilatara(doc, currentY, 6, imobil);
 
       currentY = addGardViu(doc, selectedFeatures, currentY, 7);
 
-      currentY = addIntravilan(doc, selectedFeatures, currentY, 8);
+      currentY = addArbori(doc, selectedFeatures, currentY, 8);
 
-      currentY = addPdfFooter(doc, currentY, 9);
+      currentY = addPdfFooter(doc, currentY, 9, imobil);
 
       doc.save("export_topo_pdf.pdf");
     });

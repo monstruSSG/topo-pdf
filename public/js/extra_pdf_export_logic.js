@@ -163,7 +163,7 @@ function captureMapScreenshot() {
     el.style.display = "none";
   });
 
-  if (selectedFeatures.length === 0 || selectedImobilPDF === null) {
+  if (selectedFeatures.length === 0 || selectedImobilPDF === null || !selectedImobilPDF.properties) {
     alert("Nu ati selectat niciun element de pe harta.");
   }
 
@@ -179,7 +179,7 @@ function captureMapScreenshot() {
       .then((canvas) => {
         const base64Image = canvas.toDataURL("image/png");
 
-        generateArboriPDF(base64Image, selectedFeatures, selectedImobilPDF);
+        generateArboriPDF(base64Image, selectedFeatures, selectedImobilPDF.properties);
       })
       .catch((err) => {
         console.error("Screenshot error:", err);
