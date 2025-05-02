@@ -152,25 +152,17 @@ function addPdfFooter(doc, currentY, index, imobil) {
 
   currentY += spacing + 5;
   const imgHeight = 40;
-
+  const dateOfRealisation = new Date().toLocaleDateString("ro-RO");
   doc.setFontSize(8);
-  doc.text(
-    `Data realizarii: ${new Date().toLocaleDateString("ro-RO")}`,
-    leftX,
-    currentY + imgHeight / 3
-  );
+  doc.text(`Data realizarii:`, leftX, currentY + imgHeight / 3);
 
-  doc.text(
-    `Data actualizarii: ${new Date().toLocaleDateString("ro-RO")}`,
-    centerX,
-    currentY + imgHeight / 3
-  );
+  doc.text(`Data actualizarii:`, centerX, currentY + imgHeight / 3);
 
   // Add stamp image on the right side
   const imgWidth = 50;
   const imgY = currentY - spacing; // align with signature line
 
-  doc.addImage("images/stampila.png", "PNG", rightX, imgY, imgWidth, imgHeight);
+  doc.addImage("images/stampila.jpg", "JPG", rightX, imgY, imgWidth, imgHeight);
 
   // Return the updated Y position
   currentY += imgHeight + spacing;
