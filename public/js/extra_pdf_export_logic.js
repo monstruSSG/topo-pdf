@@ -33,6 +33,7 @@ pdfButton.style.cursor = "pointer";
 pdfButton.style.fontSize = "14px";
 
 var selectedImobilPDF = null;
+var activePopupLayer = null;
 
 // Disable the button initially
 pdfButton.disabled = true;
@@ -98,8 +99,14 @@ var imobileLayer = L.geoJSON(json_Imobile_4, {
         },
       }).addTo(drawnItems);
 
+      // Close the previously active popup, if any
+      if (activePopupLayer) {
+        activePopupLayer.closePopup();
+      }
+
       // Open the popup for the selected "imobil"
       layer.openPopup();
+      activePopupLayer = layer;
 
       // Retrieve elements inside the selected "imobil"
       selectedFeatures = [];
@@ -163,8 +170,16 @@ function captureMapScreenshot() {
     el.style.display = "none";
   });
 
-  if (selectedFeatures.length === 0 || selectedImobilPDF === null || !selectedImobilPDF.properties) {
+  if (
+    selectedFeatures.length === 0 ||
+    selectedImobilPDF === null ||
+    !selectedImobilPDF.properties
+  ) {
     alert("Nu ati selectat niciun element de pe harta.");
+  }
+  
+  if (activePopupLayer) {
+    activePopupLayer.closePopup();
   }
 
   loadGeneratePDFScript(() => {
@@ -179,7 +194,11 @@ function captureMapScreenshot() {
       .then((canvas) => {
         const base64Image = canvas.toDataURL("image/png");
 
-        generateArboriPDF(base64Image, selectedFeatures, selectedImobilPDF.properties);
+        generateArboriPDF(
+          base64Image,
+          selectedFeatures,
+          selectedImobilPDF.properties
+        );
       })
       .catch((err) => {
         console.error("Screenshot error:", err);
