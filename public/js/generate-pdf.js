@@ -105,8 +105,8 @@ function addPdfHeaderWithImage(doc, metadata = {}, base64Image, imobil) {
 
   // Map image
   if (base64Image) {
-    const imgWidth = pageWidth / 1.5;
-    const imgHeight = pageWidth / 3;
+    const imgWidth = pageWidth / 1.2;
+    const imgHeight = pageWidth / 2.2;
     const imgX = (pageWidth - imgWidth) / 2;
     const imgY = currentY + 5;
 
@@ -120,7 +120,7 @@ function addPdfHeaderWithImage(doc, metadata = {}, base64Image, imobil) {
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
   doc.text(
-    `2. DENUMIRE OBIECTIV: ${imobil.Adresa}, ${imobil.TipSV}`,
+    `2. DENUMIRE OBIECTIV: ${imobil.Adresa}, ${imobil.Denumire}`,
     leftX,
     currentY
   );
@@ -173,7 +173,7 @@ function addArbori(doc, features, currentY, index) {
   currentY += spacing;
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
-  doc.text(index + ". DATE DESPRE ARBORI", leftX, currentY);
+  doc.text(index + ". DATE PRIVIND VEGETATIA EXISTENTA PE TERENUL SPATIU VERDE", leftX, currentY);
 
   currentY += spacing;
   // 1. Arbori table
@@ -361,7 +361,11 @@ function addParcele(doc, features, currentY, index) {
       p.Tip_prop || "",
       p.Mod_adm || "",
       p.Categ || "",
+      p.Reg_urb || "",
+      p.Sp_excl?.toFixed(2) || "", // Teren exclusiv
+      p.Sp_indiv?.toFixed(2) || "", // Teren indiviz
       p.Suprafata?.toFixed(2) || "",
+      p.Observatii || "",
     ];
   });
 
@@ -371,11 +375,21 @@ function addParcele(doc, features, currentY, index) {
     0
   );
 
+  const totalSpExcl = parcele.reduce(
+    (sum, feature) => sum + Number(feature.properties.Sp_excl || 0),
+    0
+  );
+
+  const totalSpIndiv = parcele.reduce(
+    (sum, feature) => sum + Number(feature.properties.Sp_indiv || 0),
+    0
+  );
+
   // Add the "Total teren" row
   parceleTableData.push([
     {
       content: "Total teren",
-      colSpan: 5, // Spans all columns except the last one
+      colSpan: 6, // Spans all columns except the last three
       styles: { halign: "left", fontStyle: "bold" },
     },
     totalSuprafata.toFixed(2), // Total area
@@ -386,12 +400,19 @@ function addParcele(doc, features, currentY, index) {
     startY: currentY,
     head: [
       [
-        "Nr. parcela",
-        "Proprietar/Detinator",
-        "Tip proprietate",
-        "Mod administrare",
-        "Categorie",
-        "Suprafata [mp]",
+        { content: "Id parcela", rowSpan: 2 },
+        { content: "Proprietar/Detinator", rowSpan: 2 },
+        { content: "Tip proprietate", rowSpan: 2 },
+        { content: "Mod administrare", rowSpan: 2 },
+        { content: "Categorie de folosinta", rowSpan: 2 },
+        { content: "Reglementare urbanistica", rowSpan: 2 },
+        { content: "Suprafata masurata [mp]", colSpan: 2 }, // Header spanning two subcolumns
+        { content: "Suprafata [mp]", rowSpan: 2 },
+        { content: "Observatii", rowSpan: 2 },
+      ],
+      [
+        { content: "Teren exclusiv" }, // Subcolumn 1
+        { content: "Teren indiviz" }, // Subcolumn 2
       ],
     ],
     body: parceleTableData,
@@ -408,7 +429,7 @@ function addParcele(doc, features, currentY, index) {
     headStyles: {
       fillColor: false,
       textColor: [0, 0, 0],
-      halign: "left",
+      halign: "center",
       fontStyle: "normal",
       lineWidth: 0.1,
       lineColor: [0, 0, 0],
@@ -505,6 +526,7 @@ function addConstructii(doc, features, currentY, index) {
       p.Nr_corp || "",
       p.Cod_dest || "",
       p.Supr_const?.toFixed(2) || "",
+      p.Observatii || "",
     ];
   });
 
@@ -518,7 +540,7 @@ function addConstructii(doc, features, currentY, index) {
   constructiiTableData.push([
     {
       content: "Total suprafata ocupata din terenul spatiu verde",
-      colSpan: 7, // Spans all columns except the last one
+      colSpan: 8, // Spans all columns except the last one
       styles: { halign: "left", fontStyle: "bold" },
     },
     totalSuprafataConstruita.toFixed(2), // Total area
@@ -529,14 +551,15 @@ function addConstructii(doc, features, currentY, index) {
     startY: currentY,
     head: [
       [
-        "Nr. constructie",
-        "ID Imobil",
+        "Id constructie",
+        "Id imobil",
         "Proprietar/Detinator",
         "Tip proprietate",
-        "Mod administrare",
-        "Corp",
-        "Destinatie",
-        "Suprafata construita la sol [mp]",
+        "Mod de administrare",
+        "Nr. Corp\nconstructie",
+        "Cod grupa destinate",
+        "Suprafata construita la sol\n[mp]",
+        "Observatii"
       ],
     ],
     body: constructiiTableData,
@@ -627,19 +650,45 @@ function addCentralizatorSuprafete(
   // Calculate the total area of the imobil
   const totalArea = imobil.Suprafata || 1; // Avoid division by zero
 
+  const ABBREVIATIONS = {
+    SV: "Spatiu verde",
+    AF: "Amenajare floricola",
+    CO: "Constructii",
+    CC: "Curti, Platforme",
+    MON: "Monumente, Statui",
+    DR: "Drumuri",
+    CF: "Cale ferata",
+    CPC: "Parcare amenajata",
+    CS: "Teren sport",
+    CSJ: "Loc de joaca amenajat",
+    CSF: "Loc de fitness amenajat",
+    CPJ: "Plaja, Strand",
+    HR: "Ape curgatoare",
+    HB: "Lacuri",
+    CT: "Targuri, Piete",
+    CI: "Cimitire",
+    ZC: "Zona compacta de vegetatie",
+    PD: "Padure-masiv vegetal",
+    TLN: "Terenuri libere neproductive",
+    TD: "Terenuri degradate",
+    HC: "Santuri, Canale",
+    GN: "Platforme depozitare gunoi menajer",
+    AP: "Acces pietonal",
+  };
+
   // Prepare data for the table
   let tableData = Object.entries(groupedData)
+    .sort((a, b) => a[0].localeCompare(b[0])) // Sort alphabetically by category
     .map(([category, data], idx) => {
       const percentage = ((data.totalArea / totalArea) * 100).toFixed(2); // Calculate percentage
       return [
-        idx + 1, // ID
+        idx + 1, // ID (added after sorting)
         category, // Categorie
-        data.description, // Descriere
+        ABBREVIATIONS[category] ? ABBREVIATIONS[category] : "", // Descriere
         data.totalArea.toFixed(2), // Suprafata
         `${percentage}%`, // Procent din total
       ];
-    })
-    .sort((a, b) => a[1].localeCompare(b[1])); // Sort alphabetically by category
+    });
 
   // Calculate the sum of all SV, AF, ZC, and PD categories
   const greenZoneCategories = ["SV", "AF", "ZC", "PD"];
@@ -675,7 +724,7 @@ function addCentralizatorSuprafete(
   doc.autoTable({
     startY: currentY,
     head: [
-      ["ID", "Categorie", "Descriere", "Suprafata [mp]", "Procent din total"],
+      ["Id", "Categorie", "Descriere", "Suprafata [mp]", "Procent din total"],
     ],
     body: tableData,
     styles: {
@@ -718,7 +767,7 @@ function generateArboriPDF(base64Image, selectedFeatures, imobil) {
           localitate: imobil.Localitate || "",
           siruta: imobil.CodSiruta || "",
           identificatorImobil: imobil["Id_ imobil"] || "",
-          suprafataImobil: imobil.Suprafata ? `${imobil.Suprafata} MP` : "",
+          suprafataImobil: imobil.Suprafata ? `${imobil.Suprafata} mp` : "",
           nrCadastral: imobil.Nr_cad || "",
           nrCarteFunciara: imobil.Nr_CF || "",
           codZonaValorica: imobil.Codzonaval || "",
