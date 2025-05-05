@@ -389,7 +389,7 @@ function addParcele(doc, features, currentY, index) {
   parceleTableData.push([
     {
       content: "Total teren",
-      colSpan: 6, // Spans all columns except the last three
+      colSpan: 9, // Spans all columns except the last three
       styles: { halign: "left", fontStyle: "bold" },
     },
     totalSuprafata.toFixed(2), // Total area
