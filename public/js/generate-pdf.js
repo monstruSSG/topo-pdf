@@ -136,7 +136,7 @@ function addPdfFooter(doc, currentY, index, imobil) {
   const spacing = 5;
   const sectionWidth = (pageWidth - 2 * 15) / 3; // 3 columns between 15mm margins
   const centerX = leftX + sectionWidth;
-  const rightX = centerX + sectionWidth + 10;
+  const rightX = centerX + sectionWidth - 10;
 
   currentY += spacing + 5;
 
@@ -151,15 +151,15 @@ function addPdfFooter(doc, currentY, index, imobil) {
   );
 
   currentY += spacing + 5;
-  const imgHeight = 40;
+  const imgHeight = 50;
   const dateOfRealisation = new Date().toLocaleDateString("ro-RO");
   doc.setFontSize(8);
-  doc.text(`Data realizarii:`, leftX, currentY + imgHeight / 3);
+  doc.text(`Data realizarii: ${dateOfRealisation}`, leftX, currentY + imgHeight / 3);
 
   doc.text(`Data actualizarii:`, centerX, currentY + imgHeight / 3);
 
   // Add stamp image on the right side
-  const imgWidth = 50;
+  const imgWidth = 75;
   const imgY = currentY - spacing; // align with signature line
 
   doc.addImage("images/stampila.jpg", "JPG", rightX, imgY, imgWidth, imgHeight);
@@ -465,7 +465,7 @@ function addGardViu(doc, features, currentY, index) {
 
   doc.autoTable({
     startY: currentY,
-    head: [["Nr. gard viu", "Lungime [m]"]],
+    head: [["Id gard viu", "Lungime [m]"]],
     body: gardViuTableData,
     styles: {
       fontSize: 8,
