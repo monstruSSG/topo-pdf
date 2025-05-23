@@ -106,11 +106,10 @@ function addPdfHeaderWithImage(doc, metadata = {}, base64Image, imobil) {
   // Map image
   if (base64Image) {
     const imgWidth = pageWidth / 1.2;
-    const imgHeight = pageWidth / 2.2;
+    const imgHeight = pageWidth / 3;
     const imgX = (pageWidth - imgWidth) / 2;
     const imgY = currentY + 5;
 
-    doc.rect(imgX, imgY, imgWidth, imgHeight); // 👈 black border
     doc.addImage(base64Image, "PNG", imgX, imgY, imgWidth, imgHeight);
 
     currentY += imgHeight;

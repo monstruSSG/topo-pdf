@@ -177,37 +177,62 @@ function captureMapScreenshot() {
   ) {
     alert("Nu ati selectat niciun element de pe harta.");
   }
-  
+
   if (activePopupLayer) {
     activePopupLayer.closePopup();
   }
 
   loadGeneratePDFScript(() => {
-    html2canvas(mapContainer, {
-      useCORS: true,
-      backgroundColor: null,
-      logging: true,
-      scale: 2, // Higher resolution
-      windowWidth: window.innerWidth,
-      windowHeight: window.innerHeight,
-    })
-      .then((canvas) => {
-        const base64Image = canvas.toDataURL("image/png");
+    // Get the bounds of the selected "imobil"
+    const selectedImobilLayer = L.geoJSON(selectedImobilPDF);
+    const bounds = selectedImobilLayer.getBounds();
 
-        generateArboriPDF(
-          base64Image,
-          selectedFeatures,
-          selectedImobilPDF.properties
-        );
+    map.fitBounds(bounds, { padding: [200, 200] });
+    map.invalidateSize(true);
+
+    setTimeout(() => {
+      const mapContainer = document.getElementById("map");
+      const rect = mapContainer.getBoundingClientRect(); // Get the map container's position and size
+
+      html2canvas(mapContainer, {
+        useCORS: true,
+        backgroundColor: null,
+        logging: true,
+        scale: 1,
+        x: rect.left,
+        y: rect.top,
+        innerHeight: rect.height,
+        innerWidth: rect.width,
       })
-      .catch((err) => {
-        console.error("Screenshot error:", err);
-      })
-      .finally(() => {
-        document.querySelectorAll(".leaflet-tooltip").forEach((el) => {
-          el.style.display = "";
+        .then((canvas) => {
+          const shiftedCanvas = document.createElement("canvas");
+          shiftedCanvas.width = canvas.width;
+          shiftedCanvas.height = canvas.height;
+
+          const ctx = shiftedCanvas.getContext("2d");
+
+          // Draw the original canvas content shifted down
+          const offsetY = +canvas.height * 0.5;
+          ctx.drawImage(canvas, 0, offsetY);
+
+          // Export new canvas as image
+          const base64Image = shiftedCanvas.toDataURL("image/png");
+
+          generateArboriPDF(
+            base64Image,
+            selectedFeatures,
+            selectedImobilPDF.properties
+          );
+        })
+        .catch((err) => {
+          console.error("Screenshot error:", err);
+        })
+        .finally(() => {
+          document.querySelectorAll(".leaflet-tooltip").forEach((el) => {
+            el.style.display = "";
+          });
         });
-      });
+    }, 400);
   });
 }
 document
