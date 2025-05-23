@@ -105,9 +105,10 @@ function addPdfHeaderWithImage(doc, metadata = {}, base64Image, imobil) {
 
   // Map image
   if (base64Image) {
-    const imgWidth = pageWidth / 1.2;
-    const imgHeight = pageWidth / 3;
-    const imgX = (pageWidth - imgWidth) / 2;
+    const imgPadding = 10; // Add padding around the image
+    const imgWidth = pageWidth - 2 * imgPadding; // Adjust width to account for padding
+    const imgHeight = imgWidth / 2.5; // Reduce height (adjust aspect ratio)
+    const imgX = imgPadding; // Start X position after padding
     const imgY = currentY + 5;
 
     doc.addImage(base64Image, "PNG", imgX, imgY, imgWidth, imgHeight);
@@ -153,12 +154,16 @@ function addPdfFooter(doc, currentY, index, imobil) {
   const imgHeight = 50;
   const dateOfRealisation = new Date().toLocaleDateString("ro-RO");
   doc.setFontSize(8);
-  doc.text(`Data realizarii: ${dateOfRealisation}`, leftX, currentY + imgHeight / 3);
+  doc.text(
+    `Data realizarii: ${dateOfRealisation}`,
+    leftX,
+    currentY + imgHeight / 3
+  );
 
   doc.text(`Data actualizarii:`, centerX, currentY + imgHeight / 3);
 
   // Add stamp image on the right side
-  const imgWidth = 75;
+  const imgWidth = 70;
   const imgY = currentY - spacing; // align with signature line
 
   doc.addImage("images/stampila.jpg", "JPG", rightX, imgY, imgWidth, imgHeight);
@@ -172,7 +177,11 @@ function addArbori(doc, features, currentY, index) {
   currentY += spacing;
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
-  doc.text(index + ". DATE PRIVIND VEGETATIA EXISTENTA PE TERENUL SPATIU VERDE", leftX, currentY);
+  doc.text(
+    index + ". DATE PRIVIND VEGETATIA EXISTENTA PE TERENUL SPATIU VERDE",
+    leftX,
+    currentY
+  );
 
   currentY += spacing;
   // 1. Arbori table
@@ -558,7 +567,7 @@ function addConstructii(doc, features, currentY, index) {
         "Nr. Corp\nconstructie",
         "Cod grupa destinate",
         "Suprafata construita la sol\n[mp]",
-        "Observatii"
+        "Observatii",
       ],
     ],
     body: constructiiTableData,

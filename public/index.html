@@ -110,6 +110,11 @@
     <script>
       var map = L.map("map", {
         zoomControl: false,
+        // De adaugat
+        preferCanvas: true,
+        zoomAnimation: false,
+        markerZoomAnimation: false,
+        // Final de adaugat
         maxZoom: 18,
         minZoom: 1,
       }).fitBounds([

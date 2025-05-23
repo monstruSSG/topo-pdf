@@ -205,18 +205,8 @@ function captureMapScreenshot() {
         innerWidth: rect.width,
       })
         .then((canvas) => {
-          const shiftedCanvas = document.createElement("canvas");
-          shiftedCanvas.width = canvas.width;
-          shiftedCanvas.height = canvas.height;
-
-          const ctx = shiftedCanvas.getContext("2d");
-
-          // Draw the original canvas content shifted down
-          const offsetY = +canvas.height * 0.5;
-          ctx.drawImage(canvas, 0, offsetY);
-
           // Export new canvas as image
-          const base64Image = shiftedCanvas.toDataURL("image/png");
+          const base64Image = canvas.toDataURL("image/png");
 
           generateArboriPDF(
             base64Image,
@@ -233,6 +223,7 @@ function captureMapScreenshot() {
           });
         });
     }, 400);
+
   });
 }
 document
