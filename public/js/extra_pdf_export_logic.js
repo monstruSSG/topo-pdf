@@ -183,13 +183,6 @@ function captureMapScreenshot() {
   }
 
   loadGeneratePDFScript(() => {
-    // Get the bounds of the selected "imobil"
-    const selectedImobilLayer = L.geoJSON(selectedImobilPDF);
-    const bounds = selectedImobilLayer.getBounds();
-
-    map.fitBounds(bounds, { padding: [200, 200] });
-    map.invalidateSize(true);
-
     setTimeout(() => {
       const mapContainer = document.getElementById("map");
       const rect = mapContainer.getBoundingClientRect(); // Get the map container's position and size
@@ -223,7 +216,6 @@ function captureMapScreenshot() {
           });
         });
     }, 400);
-
   });
 }
 document

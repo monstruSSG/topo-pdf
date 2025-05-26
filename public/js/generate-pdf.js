@@ -106,9 +106,10 @@ function addPdfHeaderWithImage(doc, metadata = {}, base64Image, imobil) {
   // Map image
   if (base64Image) {
     const imgPadding = 10; // Add padding around the image
+    const screenAspectRatio = window.innerWidth / window.innerHeight; // Calculate screen aspect ratio
     const imgWidth = pageWidth - 2 * imgPadding; // Adjust width to account for padding
-    const imgHeight = imgWidth / 2.5; // Reduce height (adjust aspect ratio)
-    const imgX = imgPadding; // Start X position after padding
+    const imgHeight = imgWidth / screenAspectRatio; // Maintain the screen's aspect ratio
+    const imgX = (pageWidth - imgWidth) / 2; // Center the image horizontally
     const imgY = currentY + 5;
 
     doc.addImage(base64Image, "PNG", imgX, imgY, imgWidth, imgHeight);
@@ -136,7 +137,7 @@ function addPdfFooter(doc, currentY, index, imobil) {
   const spacing = 5;
   const sectionWidth = (pageWidth - 2 * 15) / 3; // 3 columns between 15mm margins
   const centerX = leftX + sectionWidth;
-  const rightX = centerX + sectionWidth - 10;
+  const rightX = centerX + sectionWidth + 5;
 
   currentY += spacing + 5;
 
@@ -151,7 +152,7 @@ function addPdfFooter(doc, currentY, index, imobil) {
   );
 
   currentY += spacing + 5;
-  const imgHeight = 50;
+  const imgHeight = 43;
   const dateOfRealisation = new Date().toLocaleDateString("ro-RO");
   doc.setFontSize(8);
   doc.text(
@@ -163,7 +164,7 @@ function addPdfFooter(doc, currentY, index, imobil) {
   doc.text(`Data actualizarii:`, centerX, currentY + imgHeight / 3);
 
   // Add stamp image on the right side
-  const imgWidth = 70;
+  const imgWidth = 59;
   const imgY = currentY - spacing; // align with signature line
 
   doc.addImage("images/stampila.jpg", "JPG", rightX, imgY, imgWidth, imgHeight);
