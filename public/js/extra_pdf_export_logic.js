@@ -126,9 +126,9 @@ var imobileLayer = L.geoJSON(json_Imobile_4, {
       // Enable the "Exporta PDF" button
       pdfButton.disabled = false;
       pdfButton.style.opacity = "1";
-      if (feature && feature.properties && feature.properties["Id_ imobil"]) {
+      if (feature && feature.properties && feature.properties["Id_imobil"]) {
         // Add the selected "imobil" to the selectedFeatures array
-        pdfButton.textContent = `Exporta PDF (Id imobil: ${feature.properties["Id_ imobil"]})`;
+        pdfButton.textContent = `Exporta PDF (Id imobil: ${feature.properties["Id_imobil"]})`;
       }
     });
   },
@@ -201,7 +201,7 @@ function captureMapScreenshot() {
           // Export new canvas as image
           const base64Image = canvas.toDataURL("image/png");
 
-          generateArboriPDF(
+          generatePdf(
             base64Image,
             selectedFeatures,
             selectedImobilPDF.properties

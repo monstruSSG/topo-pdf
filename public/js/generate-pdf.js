@@ -254,13 +254,13 @@ function addImobile(doc, features, currentY, index) {
   currentY += spacing;
 
   const imobile = features.filter(
-    (feature) => feature.properties["Id_ imobil"] && feature.properties.Judetul // note the space in key name
+    (feature) => feature.properties["Id_imobil"] && feature.properties.Judetul // note the space in key name
   );
 
   const imobileTableData = imobile.map((feature) => {
     const p = feature.properties;
     return [
-      p["Id_ imobil"] || "",
+      p["Id_imobil"] || "",
       p.Judetul || "",
       p.Localitate || "",
       p.Adresa || "",
@@ -364,6 +364,7 @@ function addParcele(doc, features, currentY, index) {
   // Prepare table data
   const parceleTableData = parcele.map((feature) => {
     const p = feature.properties;
+
     return [
       p.Id_parcela || "",
       p.Prop_detin || "",
@@ -371,9 +372,9 @@ function addParcele(doc, features, currentY, index) {
       p.Mod_adm || "",
       p.Categ || "",
       p.Reg_urb || "",
-      p.Sp_excl?.toFixed(2) || "", // Teren exclusiv
-      p.Sp_indiv?.toFixed(2) || "", // Teren indiviz
-      p.Suprafata?.toFixed(2) || "",
+      p.Sp_excl ? Number(p.Sp_excl).toFixed(2) : "", // Teren exclusiv
+      p.Sp_indiv ? Number(p.Sp_indiv).toFixed(2) : "", // Teren indiviz
+      p.Suprafata ? Number(p.Suprafata).toFixed(2) : "",
       p.Observatii || "",
     ];
   });
@@ -528,7 +529,7 @@ function addConstructii(doc, features, currentY, index) {
     const p = feature.properties;
     return [
       p.Id_constr || "",
-      p["Id_ imobil"] || "",
+      p["Id_imobil"] || "",
       p.Prop_detin || "",
       p.Tip_prop || "",
       p.Mod_adm || "",
@@ -764,7 +765,7 @@ function addCentralizatorSuprafete(
 }
 
 // generate-pdf.js
-function generateArboriPDF(base64Image, selectedFeatures, imobil) {
+function generatePdf(base64Image, selectedFeatures, imobil) {
   loadJsPDF(() => {
     loadAutoTableScript(() => {
       const doc = new jspdf.jsPDF("p", "mm", "a4");
@@ -775,7 +776,7 @@ function generateArboriPDF(base64Image, selectedFeatures, imobil) {
           judet: imobil.Judetul || "",
           localitate: imobil.Localitate || "",
           siruta: imobil.CodSiruta || "",
-          identificatorImobil: imobil["Id_ imobil"] || "",
+          identificatorImobil: imobil["Id_imobil"] || "",
           suprafataImobil: imobil.Suprafata ? `${imobil.Suprafata} mp` : "",
           nrCadastral: imobil.Nr_cad || "",
           nrCarteFunciara: imobil.Nr_CF || "",
