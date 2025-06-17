@@ -98,7 +98,7 @@
         zoomAnimation: false,
         markerZoomAnimation: false,
         // Final de adaugat
-        maxZoom: 18,
+        maxZoom: 21,
         minZoom: 1,
       }).fitBounds([
         [46.538830465625765, 23.74409226608196],
@@ -202,6 +202,16 @@
       map.addLayer(layer_GoogleSatellite_1);
 
       // Pana aici de inlocuit de pe main
+
+      // harta satelit
+      var layer_Satellite = L.tileLayer(
+        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        {
+          attribution:
+            "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community",
+        }
+      );
+      // harta satelit
 
       function pop_LimitaUAT_2(feature, layer) {}
 
@@ -1347,6 +1357,7 @@
           selectAllCheckbox: true,
           children: [
             { label: "Map", layer: layer_GoogleMaps_0 },
+            { label: "Satelit", layer: layer_Satellite },
           ],
         },
       ];

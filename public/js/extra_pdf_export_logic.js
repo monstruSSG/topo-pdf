@@ -182,6 +182,13 @@ function captureMapScreenshot() {
     activePopupLayer.closePopup();
   }
 
+  // Center the map on the selected imobil
+  if (selectedImobilPDF && selectedImobilPDF.geometry) {
+    const selectedImobilLayer = L.geoJSON(selectedImobilPDF);
+    const bounds = selectedImobilLayer.getBounds();
+    map.fitBounds(bounds, { maxZoom: 18, animate: true, padding: [50, 50] });
+  }
+
   loadGeneratePDFScript(() => {
     setTimeout(() => {
       const mapContainer = document.getElementById("map");
