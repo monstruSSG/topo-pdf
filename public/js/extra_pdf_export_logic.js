@@ -178,6 +178,10 @@ function captureMapScreenshot() {
     alert("Nu ati selectat niciun element de pe harta.");
   }
 
+  const originalText = pdfButton.textContent;
+  pdfButton.textContent = "Incarcare...";
+  pdfButton.disabled = true;
+
   if (activePopupLayer) {
     activePopupLayer.closePopup();
   }
@@ -221,6 +225,9 @@ function captureMapScreenshot() {
           document.querySelectorAll(".leaflet-tooltip").forEach((el) => {
             el.style.display = "";
           });
+
+          pdfButton.textContent = originalText;
+          pdfButton.disabled = false;
         });
     }, 400);
   });

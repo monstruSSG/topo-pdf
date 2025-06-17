@@ -152,7 +152,7 @@ function addPdfFooter(doc, currentY, index, imobil) {
   );
 
   currentY += spacing + 5;
-  const imgHeight = 43;
+  const imgHeight = 45;
   const dateOfRealisation = new Date().toLocaleDateString("ro-RO");
   doc.setFontSize(8);
   doc.text(
@@ -521,7 +521,7 @@ function addConstructii(doc, features, currentY, index) {
 
   // Filter features with valid "Id_constr" and "Suprafata construita la sol mp"
   const constructii = features.filter(
-    (feature) => feature.properties.Id_constr && feature.properties.Supr_const
+    (feature) => feature.properties.Id_constr && feature.properties.Sup_const
   );
 
   // Prepare table data
@@ -535,14 +535,14 @@ function addConstructii(doc, features, currentY, index) {
       p.Mod_adm || "",
       p.Nr_corp || "",
       p.Cod_dest || "",
-      p.Supr_const?.toFixed(2) || "",
+      p.Sup_const?.toFixed(2) || "",
       p.Observatii || "",
     ];
   });
 
   // Calculate the total "Suprafata construita la sol mp"
   const totalSuprafataConstruita = constructii.reduce(
-    (sum, feature) => sum + Number(feature.properties.Supr_const || 0),
+    (sum, feature) => sum + Number(feature.properties.Sup_const || 0),
     0
   );
 
