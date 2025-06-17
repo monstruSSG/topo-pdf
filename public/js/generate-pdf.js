@@ -195,7 +195,7 @@ function addArbori(doc, features, currentY, index) {
       p.Specia,
       p.Diametru,
       p.Inaltime,
-      p.Coronament,
+      p.Coroana,
       p.Varsta,
       p.Stare_viab,
       p.Ocrotit,
