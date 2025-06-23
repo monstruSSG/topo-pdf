@@ -806,7 +806,6 @@ function generatePdf(base64Image, selectedFeatures, imobil) {
       const constructiiForImobil = json_Constructii_5.features.filter(
         (feature) => feature.properties.Id_imobil == imobil.Id_imobil
       );
-
       currentY = addConstructii(doc, constructiiForImobil, currentY, 5);
 
       currentY = addEchipareaEditilatara(doc, currentY, 6, imobil);
@@ -814,13 +813,11 @@ function generatePdf(base64Image, selectedFeatures, imobil) {
       const gardViuForImobil = json_GardViu_7.features.filter(
         (feature) => feature.properties.Id_imobil == imobil.Id_imobil
       );
-
       currentY = addGardViu(doc, gardViuForImobil, currentY, 7);
 
       const arboriForImobil = json_Arbori_8.features.filter(
         (feature) => feature.properties.Id_imobil == imobil.Id_imobil
       );
-
       currentY = addArbori(doc, arboriForImobil, currentY, 8);
 
       currentY = addPdfFooter(doc, currentY, 9, imobil);
