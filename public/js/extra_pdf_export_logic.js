@@ -32,6 +32,22 @@ pdfButton.style.borderRadius = "5px";
 pdfButton.style.cursor = "pointer";
 pdfButton.style.fontSize = "14px";
 
+// Add this script to your HTML or JS file
+
+// Create the logo element
+const logo = document.createElement("img");
+logo.src = "images/logo.jpeg";
+logo.alt = "Logo";
+logo.style.borderRadius = '5px'
+logo.style.position = "absolute";
+logo.style.bottom = "20px";
+logo.style.right = "20px";
+logo.style.width = "100px"; // Adjust size as needed
+logo.style.zIndex = "9999";
+
+// Add the logo to the body
+document.body.appendChild(logo);
+
 var selectedImobilPDF = null;
 var activePopupLayer = null;
 
