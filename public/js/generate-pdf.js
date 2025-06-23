@@ -798,13 +798,25 @@ function generatePdf(base64Image, selectedFeatures, imobil) {
         imobil
       );
 
-      currentY = addConstructii(doc, selectedFeatures, currentY, 5);
+      const constructiiForImobil = json_Constructii_5.features.filter(
+        (feature) => feature.properties.Id_imobil == imobil.Id_imobil
+      );
+
+      currentY = addConstructii(doc, constructiiForImobil, currentY, 5);
 
       currentY = addEchipareaEditilatara(doc, currentY, 6, imobil);
 
-      currentY = addGardViu(doc, selectedFeatures, currentY, 7);
+      const gardViuForImobil = json_GardViu_7.features.filter(
+        (feature) => feature.properties.Id_imobil == imobil.Id_imobil
+      );
 
-      currentY = addArbori(doc, selectedFeatures, currentY, 8);
+      currentY = addGardViu(doc, gardViuForImobil, currentY, 7);
+
+      const arboriForImobil = json_Arbori_8.features.filter(
+        (feature) => feature.properties.Id_imobil == imobil.Id_imobil
+      );
+
+      currentY = addArbori(doc, arboriForImobil, currentY, 8);
 
       currentY = addPdfFooter(doc, currentY, 9, imobil);
 
