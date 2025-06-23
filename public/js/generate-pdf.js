@@ -788,7 +788,12 @@ function generatePdf(base64Image, selectedFeatures, imobil) {
         imobil
       );
 
-      currentY = addParcele(doc, selectedFeatures, currentY, 3);
+      // Filter parcele for the current imobil
+      const parceleForImobil = json_Parcele_6.features.filter(
+        (feature) => feature.properties.Id_imobil == imobil.Id_imobil
+      );
+
+      currentY = addParcele(doc, parceleForImobil, currentY, 3);
 
       currentY = addCentralizatorSuprafete(
         doc,
