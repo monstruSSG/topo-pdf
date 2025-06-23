@@ -91,6 +91,11 @@
     <script src="https://unpkg.com/leaflet-pip@1.1.0/leaflet-pip.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script>
+      var highlightLayer;
+      function highlightFeature(e) {
+        highlightLayer = e.target;
+        highlightLayer.openPopup();
+      }
       var map = L.map("map", {
         zoomControl: false,
         //TODO De adaugat
@@ -176,7 +181,6 @@
       )[0].className += " fas fa-ruler";
       var bounds_group = new L.featureGroup([]);
       function setBounds() {}
-
       //TODO: De inlocuit de pe main
       map.createPane("pane_GoogleMaps_0");
       map.getPane("pane_GoogleMaps_0").style.zIndex = 400;
@@ -212,8 +216,20 @@
         }
       );
       // harta satelit
-
-      function pop_LimitaUAT_2(feature, layer) {}
+      function pop_LimitaUAT_2(feature, layer) {
+        layer.on({
+          mouseout: function (e) {
+            if (typeof layer.closePopup == "function") {
+              layer.closePopup();
+            } else {
+              layer.eachLayer(function (feature) {
+                feature.closePopup();
+              });
+            }
+          },
+          mouseover: highlightFeature,
+        });
+      }
 
       function style_LimitaUAT_2_0() {
         return {
@@ -243,6 +259,18 @@
       bounds_group.addLayer(layer_LimitaUAT_2);
       map.addLayer(layer_LimitaUAT_2);
       function pop_Intravilan_3(feature, layer) {
+        layer.on({
+          mouseout: function (e) {
+            if (typeof layer.closePopup == "function") {
+              layer.closePopup();
+            } else {
+              layer.eachLayer(function (feature) {
+                feature.closePopup();
+              });
+            }
+          },
+          mouseover: highlightFeature,
+        });
         var popupContent =
           '<table>\
                     <tr>\
@@ -292,6 +320,18 @@
       bounds_group.addLayer(layer_Intravilan_3);
       map.addLayer(layer_Intravilan_3);
       function pop_Imobile_4(feature, layer) {
+        layer.on({
+          mouseout: function (e) {
+            if (typeof layer.closePopup == "function") {
+              layer.closePopup();
+            } else {
+              layer.eachLayer(function (feature) {
+                feature.closePopup();
+              });
+            }
+          },
+          mouseover: highlightFeature,
+        });
         var popupContent =
           '<table>\
                     <tr>\
@@ -534,6 +574,18 @@
       bounds_group.addLayer(layer_Imobile_4);
       map.addLayer(layer_Imobile_4);
       function pop_Constructii_5(feature, layer) {
+        layer.on({
+          mouseout: function (e) {
+            if (typeof layer.closePopup == "function") {
+              layer.closePopup();
+            } else {
+              layer.eachLayer(function (feature) {
+                feature.closePopup();
+              });
+            }
+          },
+          mouseover: highlightFeature,
+        });
         var popupContent =
           '<table>\
                     <tr>\
@@ -663,7 +715,7 @@
           weight: 1.0,
           fill: true,
           fillOpacity: 0.4,
-          fillColor: "rgba(229,55,54,1.0)",
+          fillColor: "rgba(192,57,43,1.0)",
           interactive: true,
         };
       }
@@ -682,6 +734,18 @@
       bounds_group.addLayer(layer_Constructii_5);
       map.addLayer(layer_Constructii_5);
       function pop_Parcele_6(feature, layer) {
+        layer.on({
+          mouseout: function (e) {
+            if (typeof layer.closePopup == "function") {
+              layer.closePopup();
+            } else {
+              layer.eachLayer(function (feature) {
+                feature.closePopup();
+              });
+            }
+          },
+          mouseover: highlightFeature,
+        });
         var popupContent =
           '<table>\
                     <tr>\
@@ -830,14 +894,14 @@
             return {
               pane: "pane_Parcele_6",
               opacity: 1,
-              color: "rgba(247,247,247,1.0)",
+              color: "rgba(35,35,35,1.0)",
               dashArray: "",
               lineCap: "butt",
               lineJoin: "miter",
               weight: 1.0,
               fill: true,
               fillOpacity: 0.4,
-              fillColor: "rgba(109,86,84,1.0)",
+              fillColor: "rgba(243,156,18,1.0)",
               interactive: true,
             };
             break;
@@ -845,14 +909,14 @@
             return {
               pane: "pane_Parcele_6",
               opacity: 1,
-              color: "rgba(247,247,247,1.0)",
+              color: "rgba(35,35,35,1.0)",
               dashArray: "",
               lineCap: "butt",
               lineJoin: "miter",
               weight: 1.0,
               fill: true,
               fillOpacity: 0.4,
-              fillColor: "rgba(119,119,119,1.0)",
+              fillColor: "rgba(127,140,141,1.0)",
               interactive: true,
             };
             break;
@@ -867,7 +931,7 @@
               weight: 1.0,
               fill: true,
               fillOpacity: 0.4,
-              fillColor: "rgba(209,73,170,1.0)",
+              fillColor: "rgba(86,101,115,1.0)",
               interactive: true,
             };
             break;
@@ -882,7 +946,7 @@
               weight: 1.0,
               fill: true,
               fillOpacity: 0.4,
-              fillColor: "rgba(45,45,201,1.0)",
+              fillColor: "rgba(192,57,43,1.0)",
               interactive: true,
             };
             break;
@@ -897,7 +961,7 @@
               weight: 1.0,
               fill: true,
               fillOpacity: 0.4,
-              fillColor: "rgba(141,203,54,1.0)",
+              fillColor: "rgba(149,165,166,1.0)",
               interactive: true,
             };
             break;
@@ -912,7 +976,7 @@
               weight: 1.0,
               fill: true,
               fillOpacity: 0.4,
-              fillColor: "rgba(208,109,94,1.0)",
+              fillColor: "rgba(39,174,96,1.0)",
               interactive: true,
             };
             break;
@@ -927,7 +991,7 @@
               weight: 1.0,
               fill: true,
               fillOpacity: 0.4,
-              fillColor: "rgba(210,207,35,1.0)",
+              fillColor: "rgba(241,196,15,1.0)",
               interactive: true,
             };
             break;
@@ -942,7 +1006,7 @@
               weight: 1.0,
               fill: true,
               fillOpacity: 0.4,
-              fillColor: "rgba(77,80,231,1.0)",
+              fillColor: "rgba(52,73,94,1.0)",
               interactive: true,
             };
             break;
@@ -957,7 +1021,7 @@
               weight: 1.0,
               fill: true,
               fillOpacity: 0.4,
-              fillColor: "rgba(204,54,99,1.0)",
+              fillColor: "rgba(123,36,28,1.0)",
               interactive: true,
             };
             break;
@@ -972,7 +1036,7 @@
               weight: 1.0,
               fill: true,
               fillOpacity: 0.4,
-              fillColor: "rgba(162,153,37,1.0)",
+              fillColor: "rgba(93,173,226,1.0)",
               interactive: true,
             };
             break;
@@ -987,7 +1051,7 @@
               weight: 1.0,
               fill: true,
               fillOpacity: 0.4,
-              fillColor: "rgba(51,236,100,1.0)",
+              fillColor: "rgba(155,89,182,1.0)",
               interactive: true,
             };
             break;
@@ -1002,7 +1066,7 @@
               weight: 1.0,
               fill: true,
               fillOpacity: 0.4,
-              fillColor: "rgba(50,183,27,1.0)",
+              fillColor: "rgba(46,204,113,1.0)",
               interactive: true,
             };
             break;
@@ -1017,7 +1081,7 @@
               weight: 1.0,
               fill: true,
               fillOpacity: 0.4,
-              fillColor: "rgba(130,74,140,1.0)",
+              fillColor: "rgba(189,195,199,1.0)",
               interactive: true,
             };
             break;
@@ -1038,6 +1102,18 @@
       bounds_group.addLayer(layer_Parcele_6);
       map.addLayer(layer_Parcele_6);
       function pop_GardViu_7(feature, layer) {
+        layer.on({
+          mouseout: function (e) {
+            if (typeof layer.closePopup == "function") {
+              layer.closePopup();
+            } else {
+              layer.eachLayer(function (feature) {
+                feature.closePopup();
+              });
+            }
+          },
+          mouseover: highlightFeature,
+        });
         var popupContent =
           '<table>\
                     <tr>\
@@ -1112,6 +1188,18 @@
       bounds_group.addLayer(layer_GardViu_7);
       map.addLayer(layer_GardViu_7);
       function pop_Arbori_8(feature, layer) {
+        layer.on({
+          mouseout: function (e) {
+            if (typeof layer.closePopup == "function") {
+              layer.closePopup();
+            } else {
+              layer.eachLayer(function (feature) {
+                feature.closePopup();
+              });
+            }
+          },
+          mouseover: highlightFeature,
+        });
         var popupContent =
           '<table>\
                     <tr>\
@@ -1381,7 +1469,7 @@
         layer.bindTooltip(
           layer.feature.properties["Id_arbore"] !== null
             ? String(
-                "<div style=\"color: #bbe200; font-size: 8pt; font-family: 'MV Boli', sans-serif;\">" +
+                "<div style=\"color: #ffff4b; font-size: 6pt; font-style: italic; font-family: 'Calibri', sans-serif;\">" +
                   layer.feature.properties["Id_arbore"]
               ) + "</div>"
             : "",
@@ -1403,18 +1491,17 @@
       );
       document.getElementsByClassName("search-button")[0].className +=
         " fa fa-binoculars";
-      resetLabels([layer_Parcele_6, layer_Arbori_8]);
+      resetLabels([layer_Arbori_8]);
       map.on("zoomend", function () {
-        resetLabels([layer_Parcele_6, layer_Arbori_8]);
+        resetLabels([layer_Arbori_8]);
       });
       map.on("layeradd", function () {
-        resetLabels([layer_Parcele_6, layer_Arbori_8]);
+        resetLabels([layer_Arbori_8]);
       });
       map.on("layerremove", function () {
-        resetLabels([layer_Parcele_6, layer_Arbori_8]);
+        resetLabels([layer_Arbori_8]);
       });
     </script>
-
     <script src="js/extra_pdf_export_logic.js"></script>
   </body>
 </html>
