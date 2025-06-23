@@ -797,7 +797,7 @@ function generatePdf(base64Image, selectedFeatures, imobil) {
 
       currentY = addCentralizatorSuprafete(
         doc,
-        selectedFeatures,
+        parceleForImobil,
         currentY,
         4,
         imobil
