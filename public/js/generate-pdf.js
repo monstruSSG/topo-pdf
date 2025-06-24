@@ -132,10 +132,10 @@ function addPdfHeaderWithImage(doc, metadata = {}, base64Image, imobil) {
 }
 
 function addPdfFooter(doc, currentY, index, imobil) {
-  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
   const leftX = 15;
   const spacing = 5;
-  const sectionWidth = (pageWidth - 2 * 15) / 3; // 3 columns between 15mm margins
+  const sectionWidth = (doc.internal.pageSize.getWidth() - 2 * 15) / 3;
   const centerX = leftX + sectionWidth;
   const rightX = centerX + sectionWidth + 5;
 
@@ -153,6 +153,15 @@ function addPdfFooter(doc, currentY, index, imobil) {
 
   currentY += spacing + 5;
   const imgHeight = 45;
+  const imgWidth = 59;
+  const imgY = currentY - spacing; // align with signature line
+
+  // Check if there is enough space for the stamp, if not, add a new page
+  if (imgY + imgHeight + spacing > pageHeight) {
+    doc.addPage();
+    currentY = 15; // reset to top margin
+  }
+
   const dateOfRealisation = new Date().toLocaleDateString("ro-RO");
   doc.setFontSize(8);
   doc.text(
@@ -160,20 +169,22 @@ function addPdfFooter(doc, currentY, index, imobil) {
     leftX,
     currentY + imgHeight / 3
   );
-
   doc.text(`Data actualizarii:`, centerX, currentY + imgHeight / 3);
 
   // Add stamp image on the right side
-  const imgWidth = 59;
-  const imgY = currentY - spacing; // align with signature line
-
-  doc.addImage("images/stampila.jpg", "JPG", rightX, imgY, imgWidth, imgHeight);
+  doc.addImage(
+    "images/stampila.jpg",
+    "JPG",
+    rightX,
+    currentY,
+    imgWidth,
+    imgHeight
+  );
 
   // Return the updated Y position
   currentY += imgHeight + spacing;
   return currentY;
 }
-
 function addArbori(doc, features, currentY, index) {
   currentY += spacing;
   doc.setFontSize(10);
