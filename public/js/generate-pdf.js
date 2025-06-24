@@ -139,6 +139,18 @@ function addPdfFooter(doc, currentY, index, imobil) {
   const centerX = leftX + sectionWidth;
   const rightX = centerX + sectionWidth + 5;
 
+  // Estimate the height needed for the text and the stamp
+  const textHeight = 8; // Approximate height for one line of text
+  const imgHeight = 45;
+  const totalNeeded =
+    spacing + 5 + textHeight + spacing + 5 + imgHeight + spacing;
+
+  // If not enough space, add a new page and reset currentY
+  if (currentY + totalNeeded > pageHeight) {
+    doc.addPage();
+    currentY = 15; // reset to top margin
+  }
+
   currentY += spacing + 5;
 
   doc.setFontSize(10);
@@ -152,15 +164,9 @@ function addPdfFooter(doc, currentY, index, imobil) {
   );
 
   currentY += spacing + 5;
-  const imgHeight = 45;
-  const imgWidth = 59;
-  const imgY = currentY - spacing; // align with signature line
 
-  // Check if there is enough space for the stamp, if not, add a new page
-  if (imgY + imgHeight + spacing > pageHeight) {
-    doc.addPage();
-    currentY = 15; // reset to top margin
-  }
+  const imgWidth = 59;
+  const imgY = currentY; // align with signature line
 
   const dateOfRealisation = new Date().toLocaleDateString("ro-RO");
   doc.setFontSize(8);
@@ -185,6 +191,7 @@ function addPdfFooter(doc, currentY, index, imobil) {
   currentY += imgHeight + spacing;
   return currentY;
 }
+
 function addArbori(doc, features, currentY, index) {
   currentY += spacing;
   doc.setFontSize(10);
