@@ -87,9 +87,9 @@ var drawnItems = new L.FeatureGroup();
 map.addLayer(drawnItems);
 var imobileLayer = L.geoJSON(json_Imobile_4, {
   style: {
-    color: "#3388ff",
-    weight: 2,
-    fillOpacity: 0.2,
+    // color: "#3388ff",
+    weight: 0,
+    fillOpacity: 0,
   },
   onEachFeature: function (feature, layer) {
     // Add a popup with metadata about the "imobil"
